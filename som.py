@@ -42,12 +42,10 @@ class SOM(object):
     def gen_neurons(self,n):
         """Generates the neurons positions and weights"""
         assert isinstance(n, int) and n > 0
-        SOM.logger.debug("Creating %d neurons positions and weights", n)
         W = np.random.uniform(size=self.dimensions + (n,))
-        SOM.logger.debug("Initial weight: \n%s", W)
-        
         O = np.array(list(np.ndindex(self.dimensions)))
 
+        SOM.logger.debug("Created %d neurons positions and weights of %d dimensions", self.dimensions[0], n)
         return W, O
 
     # TODO: euclidean distance for now
@@ -101,7 +99,7 @@ class SOM(object):
         assert all([all([isinstance(xi, (int,float)) for xi in x[i]]) for i in range(n)]), "every element should be either an int or a float"
 
         x = np.array(x, dtype=np.float64)
-        SOM.logger.debug("input pattern: \n%s", x)
+        # SOM.logger.debug("input pattern: \n%s", x)
         W, O = self.gen_neurons(n)
 
         for t in range(1, self.iterations+1):
@@ -121,7 +119,7 @@ class SOM(object):
                 W += self.weights_diff(t, hjix, W, x[i])
 
             if t % (self.iterations // 10) == 0:
-                SOM.logger.info("progress (%d%%) <t: %d, learning_rate: %f>", 100 * t / self.iterations, t, self.learning_rate_func(t))
+                SOM.logger.info("progress [%6.2f%%] <t: %d, learning_rate: %f>", 100 * t / self.iterations, t, self.learning_rate_func(t))
 
         return W
                 
