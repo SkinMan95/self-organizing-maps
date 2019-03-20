@@ -22,7 +22,7 @@ class SOM(object):
         if self.bidimensional:
             self.dimensions = (dimensions, dimensions)
         else:
-            self.dimensions = (dimensions)
+            self.dimensions = (dimensions,)
             
         
         self.tau1 = tau1
