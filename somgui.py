@@ -26,8 +26,8 @@ class SOMGUI(object):
         fig, ax = plt.subplots()
         x = x.transpose()
         y = y.transpose()
-        ax.scatter(x[0], x[1], label='input')
-        ax.scatter(y[0], y[1], label='output', color='red')
+        ax.scatter(x[0], x[1])
+        ax.plot(y[0], y[1], 'rx-')
         
         plt.show()
 
