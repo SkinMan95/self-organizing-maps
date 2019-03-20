@@ -35,7 +35,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     import math
     x = np.arange(0, 10, 0.05)
-    y = np.sin(x)
+    var = 0.1
+    y = np.sin(x) + np.random.uniform(low=-var, high=var, size=x.shape)
     x = x
     yy = np.vstack((x,y)).transpose().tolist()
     
@@ -44,7 +45,7 @@ if __name__ == "__main__":
 
     it = 2**10
     lr = 0.1
-    dim = 100
+    dim = 50
     tau1 = 1000
     tau2 = 1000/math.log(dim)
     
