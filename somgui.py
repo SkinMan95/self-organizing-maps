@@ -26,24 +26,29 @@ class SOMGUI(object):
         fig, ax = plt.subplots()
         x = x.transpose()
         y = y.transpose()
-        ax.plot(x[0], x[1], label='input')
-        ax.scatter(y[0], y[1], label='output')
+        ax.scatter(x[0], x[1], label='input')
+        ax.scatter(y[0], y[1], label='output', color='red')
         
         plt.show()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     import math
-    dim = 10
-    x = np.arange(0, dim, 0.2)
+    x = np.arange(0, 10, 0.05)
     y = np.sin(x)
+    x = x
     yy = np.vstack((x,y)).transpose().tolist()
+    
     logging.debug("x: \n%s", x)
     logging.debug("yy: \n%s", yy)
+
+    it = 2**10
+    lr = 0.1
+    dim = 100
+    tau1 = 1000
+    tau2 = 1000/math.log(dim)
     
-    tau = 1.5 * dim
-    
-    som = SOM(50, 0.5, 50 , tau, tau/math.log(dim), None, bidimensional=False)
+    som = SOM(it, lr, dim, tau1, tau2, None, bidimensional=False)
     r = som.solve(yy)
     logging.info("r: \n%s", r)
 

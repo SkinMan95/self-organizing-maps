@@ -1,12 +1,14 @@
 import numpy as np
+import math
 import random
 import logging
 
 class SOM(object):
 
     logger = logging.getLogger('SOM')
+    learning_threshold = 0.0001
     
-    def __init__(self, iterations, learning_rate, dimensions, tau1, tau2, kernelfunc, randfunc=None, bidimensional=False):
+    def __init__(self, iterations, learning_rate, dimensions, tau1, tau2, kernelfunc, bidimensional=False):
         self.iterations = iterations
         assert isinstance(iterations, int)
         assert iterations > 0
@@ -35,15 +37,15 @@ class SOM(object):
 
         # TODO: use it in the neighborhood function
         self.kernelfunc = kernelfunc # should be a lambda function of one argument
-
-        self.randfunc = randfunc if randfunc is not None else np.random.random
         
 
     def gen_neurons(self,n):
         """Generates the neurons positions and weights"""
         assert isinstance(n, int) and n > 0
         SOM.logger.debug("Creating %d neurons positions and weights", n)
-        W = self.randfunc(self.dimensions + (n,))
+        W = np.random.uniform(size=self.dimensions + (n,))
+        SOM.logger.debug("Initial weight: \n%s", W)
+        
         O = np.array(list(np.ndindex(self.dimensions)))
 
         return W, O
@@ -56,9 +58,10 @@ class SOM(object):
         
     def winner(self, W, O, x) -> int:
         """Winner neuron for input x"""
-        mn, mn_dist = None, float('inf')
+        mn, mn_dist = None, math.inf
         for j in range(len(O)):
-            d = self.distance(W[O[j]], x)
+            d = self.distance(x, W[O[j]])
+            # SOM.logger.debug("neuron %d, weight: %s, position: %s, input: %s, minimum: %s, distance: %f", j, W[O[j]], O[j], x, mn, d)
             if d < mn_dist:
                 mn, mn_dist = j, d
 
@@ -67,26 +70,24 @@ class SOM(object):
     def learning_rate_func(self, t):
         assert t >= 0
         val = self.learning_rate * np.exp(-t/self.tau1)
-        assert 0.0 < val < 1.0
-        return val
+        return max(val, SOM.learning_threshold)
 
     def neigh_function(self, t):
         assert t >= 0
-        return self.dimensions[0] * np.exp(-t/self.tau2)
+        return max(self.dimensions[0] * np.exp(-t/self.tau2), 0.1)
 
     def neighborhood_function(self, t, O, winner):
         w = O[winner]
         diff = np.square(np.linalg.norm(O - np.ones(O.shape) * w, axis=1))
-        return np.exp( - diff / (self.neigh_function(t)**2) * 2 )
+        return np.exp( - diff / (2 * self.neigh_function(t)**2) )
 
     def weights_diff(self, t, neighfunc, W, x):
         dim = W.shape[0]
-        SOM.logger.debug("weights dims: %d", dim)
+        # SOM.logger.debug("weights dims: %d", dim)
         diff = np.tile(x, (dim,1)) - W
         neighfunc = np.reshape(neighfunc, self.dimensions)
         neighfunc = np.tile(neighfunc, (diff.shape[-1],) + (1,) * neighfunc.ndim).transpose()
-        
-        SOM.logger.debug("weights_diff learning rate (%d): %f", t, self.learning_rate_func(t))
+        # SOM.logger.debug("neighfunc: \n%s", neighfunc)
         # SOM.logger.debug("weights_diff before:\n%s", neighfunc * diff)
         
         r = self.learning_rate_func(t) * neighfunc * diff
@@ -94,27 +95,33 @@ class SOM(object):
         return r
         
     def solve(self, x):
-        # assert isinstance(x, (list, np.ndarray)) and len(x) > 0
+        assert isinstance(x, (list, np.ndarray)) and len(x) > 0
         n = len(x[0])
-        # assert all([len(xi) == n for xi in x]), "all vectors of input should be of the same dimensions"
-        # assert all([all([isinstance(xi, (int,float)) for xi in x[i]]) for i in range(n)]), "every element should be either an int or a float"
+        assert all([len(xi) == n for xi in x]), "all vectors of input should be of the same dimensions"
+        assert all([all([isinstance(xi, (int,float)) for xi in x[i]]) for i in range(n)]), "every element should be either an int or a float"
 
         x = np.array(x, dtype=np.float64)
+        SOM.logger.debug("input pattern: \n%s", x)
         W, O = self.gen_neurons(n)
 
-        for t in range(self.iterations):
-            vet_permut = list(range(n))
+        for t in range(1, self.iterations+1):
+            vet_permut = list(range(len(x)))
             random.shuffle(vet_permut)
-            for j in range(n):
+            # SOM.logger.debug("vet_permut: <%s>", vet_permut)
+            for j in range(len(vet_permut)):
                 i = vet_permut[j]
+                # SOM.logger.debug("actual input %d <%s>", i, x[i])
                 winner = self.winner(W, O, x[i])
-                SOM.logger.debug("winner(t: %d): %d", t, winner)
+                # SOM.logger.debug("winner(t: %d): %d", t, winner)
                 
                 hjix = self.neighborhood_function(t, O, winner)
                 
-                SOM.logger.debug("neighborhood_function:\n%s", hjix)
+                # SOM.logger.debug("neighborhood_function:\n%s", hjix)
                 
                 W += self.weights_diff(t, hjix, W, x[i])
+
+            if t % (self.iterations // 10) == 0:
+                SOM.logger.info("progress (%d%%) <t: %d, learning_rate: %f>", 100 * t / self.iterations, t, self.learning_rate_func(t))
 
         return W
                 
