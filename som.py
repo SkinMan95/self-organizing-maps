@@ -48,7 +48,8 @@ class SOM(object):
 
         return W, O
 
-    def distance(self, a, b=None): # TODO: euclidean distance for now
+    # TODO: euclidean distance for now
+    def distance(self, a, b=None):
         if b is None:
             return np.linalg.norm(a)
         return np.linalg.norm(a - b)
@@ -93,10 +94,10 @@ class SOM(object):
         return r
         
     def solve(self, x):
-        assert isinstance(x, list) and len(x) > 0
+        # assert isinstance(x, (list, np.ndarray)) and len(x) > 0
         n = len(x[0])
-        assert all([len(xi) == n for xi in x]), "all vectors of input should be of the same dimensions"
-        assert all([all([isinstance(xi, (int,float)) for xi in x[i]]) for i in range(n)]), "every element should be either an int or a float"
+        # assert all([len(xi) == n for xi in x]), "all vectors of input should be of the same dimensions"
+        # assert all([all([isinstance(xi, (int,float)) for xi in x[i]]) for i in range(n)]), "every element should be either an int or a float"
 
         x = np.array(x, dtype=np.float64)
         W, O = self.gen_neurons(n)
@@ -124,6 +125,6 @@ if __name__ == "__main__":
         x = [[float(i) for i in line.strip().split(",")] for line in f.readlines()]
         dim = 12
         tau = 15
-        som = SOM(20, 0.15, dim, tau, tau/math.log(dim), None, bidimensional=True)
+        som = SOM(20, 0.05, dim, tau, tau/math.log(dim), None, bidimensional=False)
         print(som.solve(x))
 
