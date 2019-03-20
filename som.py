@@ -84,7 +84,13 @@ class SOM(object):
         diff = np.tile(x, (dim,1)) - W
         neighfunc = np.reshape(neighfunc, self.dimensions)
         neighfunc = np.tile(neighfunc, (diff.shape[-1],) + (1,) * neighfunc.ndim).transpose()
-        return self.learning_rate_func(t) * neighfunc * diff
+        
+        SOM.logger.debug("weights_diff learning rate (%d): %f", t, self.learning_rate_func(t))
+        # SOM.logger.debug("weights_diff before:\n%s", neighfunc * diff)
+        
+        r = self.learning_rate_func(t) * neighfunc * diff
+        # SOM.logger.debug("weights_diff after:\n%s", r)
+        return r
         
     def solve(self, x):
         assert isinstance(x, list) and len(x) > 0
@@ -101,15 +107,23 @@ class SOM(object):
             for j in range(n):
                 i = vet_permut[j]
                 winner = self.winner(W, O, x[i])
+                SOM.logger.debug("winner(t: %d): %d", t, winner)
+                
                 hjix = self.neighborhood_function(t, O, winner)
+                
+                SOM.logger.debug("neighborhood_function:\n%s", hjix)
+                
                 W += self.weights_diff(t, hjix, W, x[i])
 
         return W
                 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     import math
     with open("data/iris.csv", 'r') as f:
         x = [[float(i) for i in line.strip().split(",")] for line in f.readlines()]
-        som = SOM(20, 0.1, 5, 1000, 1000/math.log(5), None, bidimensional=True)
+        dim = 12
+        tau = 15
+        som = SOM(20, 0.15, dim, tau, tau/math.log(dim), None, bidimensional=True)
         print(som.solve(x))
 
