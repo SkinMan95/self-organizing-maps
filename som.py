@@ -69,9 +69,6 @@ class SOM(object):
         assert 0.0 < val < 1.0
         return val
 
-    def adaptation_function(self, t, W, x):
-        pass
-
     def neigh_function(self, t):
         assert t >= 0
         return self.dimensions[0] * np.exp(-t/self.tau2)
@@ -80,9 +77,6 @@ class SOM(object):
         w = O[winner]
         diff = np.square(np.linalg.norm(O - np.ones(O.shape) * w, axis=1))
         return np.exp( - diff / (self.neigh_function(t)**2) * 2 )
-
-    # def neighbor_activation(self, t, neighfunc):
-    #     return 
 
     def weights_diff(self, t, neighfunc, W, x):
         dim = W.shape[0]
