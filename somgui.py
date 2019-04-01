@@ -35,7 +35,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     import math
     x = np.arange(0, 10, 0.05)
-    var = 0.1
+    var = 0.3
     y = np.sin(x) + np.random.uniform(low=-var, high=var, size=x.shape)
     x = x
     yy = np.vstack((x,y)).transpose().tolist()
