@@ -34,13 +34,23 @@ class SOMGUI(object):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     import math
-    x = np.arange(0, 10, 0.05)
-    var = 0.3
-    y = np.sin(x) + np.random.uniform(low=-var, high=var, size=x.shape)
-    x = x
+
+    delta = np.pi / 2.0 / 24.0
+    
+    logging.debug("delta: %f", delta)
+    
+    theta = np.arange(0, 2.0 * np.pi * 1.5 , delta)
+    logging.debug("input size: %s", theta.shape)
+    
+    a = 1.2
+    b = 0.3
+    r = a * np.exp(b * theta)
+    var = 0.5
+    x = r * np.cos(theta) + np.random.uniform(low=-var, high=var, size=theta.shape)
+    y = r * np.sin(theta) + np.random.uniform(low=-var, high=var, size=theta.shape)
     yy = np.vstack((x,y)).transpose().tolist()
     
-    logging.debug("x: \n%s", x)
+    logging.debug("x: \n%s\ny:\n%s", x, y)
     logging.debug("yy: \n%s", yy)
 
     it = 2**10
