@@ -18,7 +18,7 @@ In order to verify the installation install this additional dependency or just t
 In order to execute the sample software, first clone this repository and execute the software as:
 
 ```bash
-git clone https://github.com/SkinMan95/self-organizing-maps.git
+git clone https://github.com/aanzolaavila/self-organizing-maps.git
 cd self-organizing-maps
 python3 somgui.py
 ```
